@@ -1,6 +1,7 @@
 library(ggplot2)
 library(data.table)
 library(xtable)
+library(knitr)
 Activity<-fread("activity.csv")
 
 StepDay<-Activity[!is.na(steps),.(Sum=sum(steps),Mean=mean(steps),Median=median(steps)),by=date]
@@ -38,3 +39,5 @@ StepTimeWeek<-Activity[!is.na(steps),.(Sum=sum(steps),Mean=mean(steps),Median=as
 qplot(data =StepTimeWeek ,x = interval,y=Mean, facets = Type~.,geom = "line",xlab = '5-minute interval',ylab='Average number of steps')
 StepTime[Mean==max(StepTime$Mean),interval]
 
+
+knit2html("PA1_template.Rmd")

@@ -10,6 +10,7 @@ output:
 library(ggplot2)
 library(data.table)
 library(xtable)
+library(knitr)
 ```
 ## Loading the data
 ```{r data, echo=TRUE}
@@ -17,24 +18,27 @@ Activity<-fread("activity.csv")
 ```
 
 ## What is mean total number of steps taken per day?
-```{r day, echo=TRUE}
+```{r day, echo=TRUE,results="asis"}
 StepDay<-Activity[!is.na(steps),.(Sum=sum(steps),Mean=mean(steps),Median=median(steps)),by=date]
+#Histogram of the total number of steps taken each day
 qplot(data =StepDay ,x = date,y=Sum,geom = "histogram",stat="identity",xlab = 'Date',ylab='Average number of steps')+ theme(axis.text.x = element_text(angle = 90, hjust = 1))
 StepDay.table<-xtable(StepDay[,list(date,Mean,Median)])
+#Mean and median total number of steps taken per day
 print(StepDay.table, type="html")
 ```
-
 
 ## What is the average daily activity pattern?
 ```{r daily, echo=TRUE}
 StepTime<-Activity[!is.na(steps),.(Sum=sum(steps),Mean=mean(steps),Median=median(steps)),by=interval]
+#Time series plot of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
 qplot(data =StepTime ,x = interval,y=Mean,geom = "line",xlab = '5-minute interval',ylab='Average number of steps')
+#Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps
 StepTime[Mean==max(StepTime$Mean),interval]
 ```
 
 
 ## Imputing missing values
-```{r Imputing, echo=TRUE}
+```{r Imputing, results="asis", echo=TRUE}
 #number of missing values in the dataset
 nrow(Activity[is.na(steps)])
 #Create a new dataset that is equal to the original dataset but with the missing data filled in
@@ -45,9 +49,13 @@ StepDayAfterImpu<-ActivityImpu[,.(Sum=sum(steps),Mean=mean(steps),Median=median(
 qplot(data =StepDayAfterImpu ,x = date,y=Sum,geom = "histogram",stat="identity",xlab = 'Date',ylab='Average number of steps')+ theme(axis.text.x = element_text(angle = 90, hjust = 1))
 #Calculate and report the mean and median total number of steps taken per day
 StepDayAfterImpu.table<-xtable(StepDayAfterImpu[,list(date,Mean,Median)])
-print(StepDayAfterImpu.table,, type="html")
+print(StepDayAfterImpu.table, type="html")
 ```
 
+###Do these values differ from the estimates from the first part of the assignment? 
+Yes
+###What is the impact of imputing missing data on the estimates of the total daily number of steps?
+In some days total daily number of steps are increased
 
 ## Are there differences in activity patterns between weekdays and weekends?
 ```{r week, echo=TRUE}
@@ -58,5 +66,4 @@ Activity$Type<-ifelse(Activity$Weekday=="Sunday"|Activity$Weekday=="Saturday","W
 #and the average number of steps taken, averaged across all weekday days or weekend days (y-axis).
 StepTimeWeek<-Activity[!is.na(steps),.(Sum=sum(steps),Mean=mean(steps),Median=as.numeric(median(steps))),by=list(Type,interval)]
 qplot(data =StepTimeWeek ,x = interval,y=Mean, facets = Type~.,geom = "line",xlab = '5-minute interval',ylab='Average number of steps')
-StepTime[Mean==max(StepTime$Mean),interval]
 ```
