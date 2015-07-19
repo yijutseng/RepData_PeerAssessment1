@@ -1,40 +1,18 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
-
-## Loading library
-```{r lib, echo=TRUE}
 library(ggplot2)
 library(data.table)
 library(xtable)
-```
-## Loading the data
-```{r data, echo=TRUE}
 Activity<-fread("activity.csv")
-```
 
-## What is mean total number of steps taken per day?
-```{r day, echo=TRUE}
 StepDay<-Activity[!is.na(steps),.(Sum=sum(steps),Mean=mean(steps),Median=median(steps)),by=date]
 qplot(data =StepDay ,x = date,y=Sum,geom = "histogram",stat="identity",xlab = 'Date',ylab='Average number of steps')+ theme(axis.text.x = element_text(angle = 90, hjust = 1))
 StepDay.table<-xtable(StepDay[,list(date,Mean,Median)])
-print(StepDay.table, type="html")
-```
+print(StepDay.table)
 
-
-## What is the average daily activity pattern?
-```{r daily, echo=TRUE}
 StepTime<-Activity[!is.na(steps),.(Sum=sum(steps),Mean=mean(steps),Median=median(steps)),by=interval]
 qplot(data =StepTime ,x = interval,y=Mean,geom = "line",xlab = '5-minute interval',ylab='Average number of steps')
 StepTime[Mean==max(StepTime$Mean),interval]
-```
 
 
-## Imputing missing values
-```{r Imputing, echo=TRUE}
 #number of missing values in the dataset
 nrow(Activity[is.na(steps)])
 #Create a new dataset that is equal to the original dataset but with the missing data filled in
@@ -45,12 +23,12 @@ StepDayAfterImpu<-ActivityImpu[,.(Sum=sum(steps),Mean=mean(steps),Median=median(
 qplot(data =StepDayAfterImpu ,x = date,y=Sum,geom = "histogram",stat="identity",xlab = 'Date',ylab='Average number of steps')+ theme(axis.text.x = element_text(angle = 90, hjust = 1))
 #Calculate and report the mean and median total number of steps taken per day
 StepDayAfterImpu.table<-xtable(StepDayAfterImpu[,list(date,Mean,Median)])
-print(StepDayAfterImpu.table,, type="html")
-```
+print(StepDayAfterImpu.table)
+
+#Do these values differ from the estimates from the first part of the assignment? 
+#What is the impact of imputing missing data on the estimates of the total daily number of steps?
 
 
-## Are there differences in activity patterns between weekdays and weekends?
-```{r week, echo=TRUE}
 #Are there differences in activity patterns between weekdays and weekends?
 Activity$Weekday<-weekdays(as.Date(Activity$date))
 Activity$Type<-ifelse(Activity$Weekday=="Sunday"|Activity$Weekday=="Saturday","Weekend","Weekday")
@@ -59,4 +37,4 @@ Activity$Type<-ifelse(Activity$Weekday=="Sunday"|Activity$Weekday=="Saturday","W
 StepTimeWeek<-Activity[!is.na(steps),.(Sum=sum(steps),Mean=mean(steps),Median=as.numeric(median(steps))),by=list(Type,interval)]
 qplot(data =StepTimeWeek ,x = interval,y=Mean, facets = Type~.,geom = "line",xlab = '5-minute interval',ylab='Average number of steps')
 StepTime[Mean==max(StepTime$Mean),interval]
-```
+
